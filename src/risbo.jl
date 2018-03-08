@@ -6,9 +6,14 @@ using ArgCheck
 using WignerFunctions: Index, Cache, initial_wigner
 using OffsetArrays: OffsetArray
 
-function nosym_recurrence end
-
 nosym(β::AbstractFloat, index::Index) = nosym(β, index, Cache{typeof(β)}())
+function nosym(β::AbstractFloat)
+    cache = Cache{typeof(β)}()
+    (l::Int64, m₁::Int64, m₂::Int64) -> nosym(β, Index(l, m₁, m₂), cache)
+end
+nosym(β::Integer) = risbo(float(β))
+
+
 function nosym(β::AbstractFloat, index::Index, cache::Cache)
     @argcheck 0 <= index.l
     @argcheck abs(index.m₁) <= index.l
@@ -54,11 +59,5 @@ function nosym_recurrence(β::AbstractFloat, l::Integer, cache::Cache)
         cache[Index(l, k + 1, i + 1)] += √((l + i + 1) * (l + k + 1)) * rec * coshb
     end
 end
-
-function nosym(β::AbstractFloat)
-    cache = Cache{typeof(β)}()
-    (l::Int64, m₁::Int64, m₂::Int64) -> nosym(β, Index(l, m₁, m₂), cache)
-end
-nosym(β::Integer) = risbo(float(β))
 
 end
