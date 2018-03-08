@@ -1,11 +1,10 @@
 module WignerFunctions
-export risbo
+export risbo, trapani
 
-using NamedTuples: @NT
 using ArgCheck
+using NamedTuples: @NT
 
 const Index = @NT(l::Int64, m₁::Int64, m₂::Int64)
-const Cache = Dict{Index, T} where T <: AbstractFloat
 
 function initial_wigner(β::Number, index::Index)
     @argcheck 0 <= index.l < 2
@@ -35,9 +34,11 @@ function initial_wigner(β::Number, index::Index)
     end
 end
 
-include("risbo.jl")
-risbo = Risbo.half
+""" D-Matrix the straightforward way
 
+Unless called with `BigFloat` with `seprecision` to something sufficiently high, this method will
+fail to give the correct results.
+"""
 function naive(β::AbstractFloat, index::Index)
     result::typeof(β) = 0
     j::BigInt, m::BigInt, n::BigInt = index
@@ -54,4 +55,11 @@ function naive(β::AbstractFloat, index::Index)
 end
 naive(β::AbstractFloat, l::Integer, m₁::Integer, m₂::Integer) = naive(β, Index(l, m₁, m₂))
 
+include("risbo.jl")
+""" D-Matrix via Risbo's recursion formula """
+const risbo = Risbo.half
+
+include("trapani.jl")
+""" D-Matrix via Trapani & Navara's recursion formula """
+const trapani = Trapani.trapani
 end # module

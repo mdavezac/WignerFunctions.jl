@@ -1,10 +1,11 @@
 module Risbo
-export risbo
 
 using ArgCheck
 
-using WignerFunctions: Index, Cache, initial_wigner
+using WignerFunctions: Index, initial_wigner
 using OffsetArrays: OffsetArray
+
+const Cache = Dict{Index, T} where T <: AbstractFloat
 
 nosym(β::AbstractFloat, index::Index) = nosym(β, index, Cache{typeof(β)}())
 function nosym(β::AbstractFloat)
