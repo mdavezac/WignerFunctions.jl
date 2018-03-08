@@ -36,7 +36,7 @@ function initial_wigner(β::Number, index::Index)
 end
 
 include("risbo.jl")
-risbo = Risbo.nosym
+risbo = Risbo.half
 
 function naive(β::AbstractFloat, index::Index)
     result::typeof(β) = 0

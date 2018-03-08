@@ -39,7 +39,7 @@ WignerFunctions.Index(::typeof(d200)) = WignerFunctions.Index(2, 0, 0)
     end
 end
 
-@testset "$method" for method ∈ (WignerFunctions.Risbo.nosym,)
+@testset "$method" for method ∈ (WignerFunctions.Risbo.nosym, WignerFunctions.Risbo.half)
     dmatrix = method(0)
     @testset "diagonal: β=-0, l=$l, m₁=$m₁, m₂=$m₂" for l ∈ 0:4, m₁ ∈ -l:l, m₂ ∈ -l:l
         @test dmatrix(l, m₁, m₂) ≈ (m₁ == m₂ ? 1: 0)
