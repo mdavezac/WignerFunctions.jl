@@ -79,7 +79,7 @@ function half(β::AbstractFloat, index::Index, cache::Cache)
         if index.l <= 1
             cache[index] = initial_wigner(convert(valtype(cache), β), index)
         else
-            nosym_recurrence(convert(valtype(cache), β), index.l, cache)
+            half_recurrence(convert(valtype(cache), β), index.l, cache)
             cache[index]
         end
     elseif (index.m₁ + index.m₂) % 2 == 0

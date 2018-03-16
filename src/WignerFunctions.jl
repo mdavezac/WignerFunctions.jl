@@ -57,7 +57,7 @@ naive(β::AbstractFloat, l::Integer, m₁::Integer, m₂::Integer) = naive(β, I
 
 include("risbo.jl")
 """ D-Matrix via Risbo's recursion formula """
-const risbo = Risbo.half
+const risbo = Risbo.nosym
 
 # include("trapani.jl")
 # """ D-Matrix via Trapani & Navara's recursion formula """
