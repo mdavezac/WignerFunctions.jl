@@ -41,10 +41,10 @@ function trapani(β::AbstractFloat, index::Index, branch, cache::Cache)
     factor(n::Integer) = x -> n % 2 == 0 ? x: -x
     if index.m₂ < 0 
         @debug "m₂ < 0" branch β index
-        trapani(β - π, index.l, index.m₁, -index.m₂, !branch, cache) |> factor(index.l + index.m₁)
+        trapani(β, index.l, index.m₁, -index.m₂, !branch, cache) |> factor(index.l + index.m₁)
     elseif index.m₁ < 0
         @debug "m₁ < 0" branch β index
-        trapani(β - π, index.l, -index.m₁, index.m₂, !branch, cache) |> factor(index.l + index.m₂)
+        trapani(β, index.l, -index.m₁, index.m₂, !branch, cache) |> factor(index.l + index.m₂)
     elseif index.m₂ > index.m₁
         @debug "m₂ > m₁" branch β index
         trapani(β, index.l, index.m₂, index.m₁, branch, cache) |> factor(index.m₁ + index.m₂)
@@ -52,30 +52,38 @@ function trapani(β::AbstractFloat, index::Index, branch, cache::Cache)
         @debug "cache" branch β index
         cache[branch, index]
     elseif index.l <= 1
-        cache[branch, index] = initial_wigner(convert(valtype(cache), β), index)
+        if branch
+            cache[branch, index] = initial_wigner(convert(valtype(cache), β), index)
+        else
+            cache[branch, index] = initial_wigner(convert(valtype(cache), β - π), index)
+        end
         @debug "init" branch β index value=cache[branch, index]
         cache[branch, index]
     else
         recurrence(convert(valtype(cache), β), index.l, branch, cache)
-        @debug "rec" branch β index value=cache[branch, index]
+        @debug "rec end" branch β index value=cache[branch, index]
         cache[branch, index]
     end
 end
 
 function recurrence(β::AbstractFloat, l::Integer, branch::Bool, cache::Cache)
-    cache[branch, l, l, 0] = √((2l - 1) / 2) * trapani(β, Index(l - 1, l - 1, 0), branch, cache)
+    recursion = (l, m₁, m₂) -> trapani(β, l, m₁, m₂, branch, cache)
+
+    cache[branch, l, l, 0] = -√((2l - 1) / 2l) * recursion(l - 1, l - 1, 0)
     for m₂ ∈ 1:l
         factor = √(l * (2l - 1) / (2(l + m₂) * (l + m₂ - 1)))
-        cache[branch, l, l, m₂] = factor * trapani(β, Index(l - 1, l - 1, m₂ - 1), branch, cache)
+        cache[branch, l, l, m₂] = factor * recursion(l - 1, l - 1, m₂ - 1)
+        @debug "rec: " l m₂ factor cache[branch, l, l, m₂]
     end
 
+    t1 = (l, m₁, m₂) -> 2m₂ / √((l - m₁) * (l + m₁ + 1))
+    t2 = (l, m₁, m₂) -> √((l - m₁ - 1) * (l + m₁ + 2) / (l - m₁) * (l + m₁ + 1))
     for m₂ ∈ 0:l
-        cache[branch, l, l - 1, m₂] = 2m₂ / √(2l) * cache[branch, l, l, m₂]
+        cache[branch, l, l - 1, m₂] = 2m₂ / √(2l) * recursion(l, l, m₂ - 1)
         for m₁ ∈ (l - 2):-1:m₂
-             t1 = 2m₂ / √((l - m₁) * (l + m₁ + 1))
-             t2 = √((l - m₁ - 1) * (l + m₁ + 2) / (l - m₁) * (l + m₁ + 1))
-             value = t1 * cache[branch, l, m₁ + 1, m₂] - t2 * cache[branch, l, m₁ + 2, m₂]
-             cache[branch, l, m₁, m₂] = value
+            a = t1(l, m₁, m₂) * recursion(l, m₁ + 1, m₂)
+            b = t2(l, m₁, m₂) * recursion(l, m₁ + 2, m₂)
+            cache[branch, l, m₁, m₂] = a - b
         end
     end
 end

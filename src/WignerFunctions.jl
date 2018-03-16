@@ -1,5 +1,5 @@
 module WignerFunctions
-export risbo, trapani
+export risbo #, trapani
 
 using ArgCheck
 using NamedTuples: @NT
@@ -59,7 +59,7 @@ include("risbo.jl")
 """ D-Matrix via Risbo's recursion formula """
 const risbo = Risbo.half
 
-include("trapani.jl")
-""" D-Matrix via Trapani & Navara's recursion formula """
-const trapani = Trapani.trapani
+# include("trapani.jl")
+# """ D-Matrix via Trapani & Navara's recursion formula """
+# const trapani = Trapani.trapani
 end # module
