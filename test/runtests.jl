@@ -68,3 +68,23 @@ end
     setprecision(oldprec)
 end
 nothing
+
+@testset "Delta recurrence" begin
+    recurrence = WignerFunctions.Trapani.delta_recurrence
+    @test recurrence(0, 0, 0) == 1
+    @test recurrence(3, 4, 0) == 0
+    @test recurrence(3, 0, -4) == 0
+
+
+    ls = rand(2:20, 50)
+    ms = rand.(range.(-ls, ls, step=1))
+    ms′ = rand.(range.(-ls, ls, step=1))
+    oldprec = precision(BigFloat)
+    setprecision(512)
+    naive = (l, m₁, m₂) -> float(WignerFunctions.naive(BigFloat(pi)/2, l, m₁, m₂))
+    @testset "Against naive l=$(ls[i]), m=$(ms[i]), m′=$(ms′[i]) " for i ∈ 1:length(ls)
+        l, m₁, m₂ = ls[i], ms[i], ms′[i]
+        @test recurrence(l, m₁, m₂) ≈ naive(l, m₁, m₂)
+    end
+    setprecision(oldprec)
+end
